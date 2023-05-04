@@ -4,6 +4,7 @@ var shoesController = require("../controllers/shoes.controller");
 
 var api = express.Router();
 
-api.get("/getShoes",[],shoesController.getShoes);
+api.get("/",[],shoesController.getShoes);
+api.post("/",[], shoesController.saveShoes);
 
 module.exports = api;
