@@ -33,7 +33,35 @@ async function  saveShoes(req, res){
     }
 }
 
+
+
+
+async function  getShoeByUser(req, res){
+    var driver = driverFile.setDriver();
+    var session = driver.session();
+    var params = req.body;
+    var typeShoes = params.typeShoes;
+    var brand = params.brand;
+    var genre = params.genre;
+    console.log(genre)
+    try {
+        var query = 'MATCH (shoe:shoes) WHERE shoe.brand = "'+brand+'" AND shoe.style = "'+typeShoes+'" AND shoe.genre = "'+genre+'" RETURN shoe LIMIT 1';
+        var nodes = await session.run(query);
+        if(nodes.records.length==0){
+            res.send({message:"nodes not found"});
+        }else{
+            res.send({message:"nodes found", nodes:nodes.records[0]});
+        }
+        
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({status:500, message:"internal error"})
+    }
+
+}
+
 module.exports ={
     saveShoes,
-    getShoes
+    getShoes,
+    getShoeByUser
 }
