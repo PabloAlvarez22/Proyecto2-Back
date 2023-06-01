@@ -6,5 +6,8 @@ var api = express.Router();
 
 api.get("/",[],shoesController.getShoes);
 api.post("/",[], shoesController.saveShoes);
+api.post("/getShoeByUser",[],shoesController.getShoeByUser);
+api.post("/getShoeByBrand",[],shoesController.getShoeByBrand);
+api.post("/getShoeByStyle",[],shoesController.getShoeByStyle);
 
 module.exports = api;

@@ -1,11 +1,17 @@
-var neo4j = require('neo4j-driver')
+var neo4j = require('neo4j-driver');
 
-var driver = neo4j.driver(
-    process.env.URI,
-    neo4j.auth.basic(
-        process.env.USERNAME,
-        process.env.PASSWORD
-    )
-);
+function setDriver(){
+    var driver = neo4j.driver(
+        process.env.URI,
+        neo4j.auth.basic(
+            process.env.USERNAMEDB,
+            process.env.PASSWORD
+        )
+    );
+    
+    return driver
+}
 
-return driver;
+module.exports={
+    setDriver
+}
