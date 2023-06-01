@@ -65,7 +65,40 @@ async function saveUser(req, res){
 }
 
 
+
+async function updateUser(req, res){
+    var driver = driverFile.setDriver();
+    var session = driver.session();
+    var params = req.body;
+    if(params.email  && params.name  && params.typeShoes && params.brand){
+        console.log(params.password+" password")
+        if(params.password=="" || params.password== undefined){
+            var query = "MATCH (user:users {email: '"+params.email+"'}) SET user.name = '"+params.name+"', user.typeShoes = '"+params.typeShoes+"'  , user.brand = '"+params.brand+"'  , user.age = '"+params.age+"' , user.genre = '"+params.genre+"' RETURN user";
+            var nodes = await session.run(query);
+            return res.send({message: "USUARIO ACTUALIZADO", find:nodes.records[0]._fields[0].properties});
+        }else{
+           
+            bcrypt.hash(params.password,null,null, async (err,passwordHash)=>{
+                if(err){
+                    return res.status(500).send({message: "error general en hash", err});
+                }else if(passwordHash){
+                    var query = "MATCH (user:users {email: '"+params.email+"'}) SET user.name = '"+params.name+"', user.typeShoes = '"+params.typeShoes+"'  , user.brand = '"+params.brand+"'  , user.age = '"+params.age+"' , user.genre = '"+params.genre+"' , user.password = '"+passwordHash+"' RETURN user";
+                    var nodes = await session.run(query);
+
+                    return res.send({message:"USUARIO ACTUALIZADO", find:nodes.records[0]._fields[0].properties})
+                }
+            });
+        }
+        
+        
+    }else{
+        return res.send({message: "CAMPOS FALTANTES"});
+    }
+}
+
+
 module.exports ={
     saveUser,
-    login
+    login,
+    updateUser
 }
