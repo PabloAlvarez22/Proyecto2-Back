@@ -5,6 +5,39 @@ var jwt = require("../services/jwt");
 var driverFile = require("./../driver");
 
 
+
+async function login(req,res){
+    var driver = driverFile.setDriver();
+    var session = driver.session();
+    var params = req.body;
+    
+    if(params.email && params.password){
+        var query = "MATCH (u:users) WHERE u.email='"+params.email+"' RETURN u";
+        var nodes = await session.run(query);
+        if(nodes.records){
+            
+            bcrypt.compare(params.password,nodes.records[0]._fields[0].properties.password,(err,passwordCheck)=>{
+                if(err){                        
+                    return res.status(500).send({message: "ERROR GENERAL EN EL SERVICIO", err});
+                }else if(passwordCheck){
+                    return res.send({token:
+                        jwt.createToken(nodes.records[0]._fields[0].properties),
+                        find: nodes.records[0]._fields[0].properties,
+                        message: "HAS INGRESADO SESIÓN"
+                    });
+                }else{
+                    return res.send({message: "TU CONTRASEÑA ES INCORRECTA"});
+                }
+            })
+        }else{
+            res.send({message:"No hay registros de este usuario"});
+        }
+    }else{
+        return res.send({message: "CAMPOS FALTANTES"});
+    }
+}
+
+
 async function saveUser(req, res){
     var driver = driverFile.setDriver();
     var session = driver.session();
@@ -33,5 +66,6 @@ async function saveUser(req, res){
 
 
 module.exports ={
-    saveUser
+    saveUser,
+    login
 }
