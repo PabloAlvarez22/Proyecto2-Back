@@ -196,6 +196,50 @@ async function  setRelationShoeToUser(req, res){
 
 }
 
+async function  getByMaterialSoleShoes(req, res){
+    var driver = driverFile.setDriver();
+    var session = driver.session();
+    var params = req.body;
+    var email = params.email;
+    try {
+        var query = 'MATCH (n:users {email: "'+email+'"}) MATCH (n)-[r]->(m) RETURN m';
+        var nodes = await session.run(query);
+        if(nodes.records.length==0){
+            res.send({message:"nodes not found"});
+        }else{
+            const recuento = {};
+
+            nodes.records.forEach(element => {
+                let string = element._fields[0].properties.materialSole;
+                recuento[string] = (recuento[string] || 0) + 1;
+            });
+
+            let stringMasFrecuente;
+            let frecuenciaMasAlta = 0;
+
+            Object.entries(recuento).forEach(([string, frecuencia]) => {
+                if (frecuencia > frecuenciaMasAlta) {
+                stringMasFrecuente = string;
+                frecuenciaMasAlta = frecuencia;
+                }
+            });
+            
+            var query1 = 'MATCH (shoe:shoes) WHERE shoe.materialSole = "'+stringMasFrecuente+'"    RETURN shoe ';
+            var nodes1 = await session.run(query1);
+            if(nodes1.records.length==0){
+                res.send({message:"nodes not found"});
+            }else{
+                res.send({message:"nodes found", nodes:nodes1.records, string:stringMasFrecuente});
+            }      
+        }
+        
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({status:500, message:"internal error"})
+    }
+
+}
+
 module.exports ={
     saveShoes,
     getShoes,
@@ -203,5 +247,7 @@ module.exports ={
     getShoeByBrand,
     getShoeByStyle,
     getImgShoes,
-    setRelationShoeToUser
+    setRelationShoeToUser,
+    getByMaterialSoleShoes,
+    getFavorites
 }
