@@ -176,11 +176,32 @@ function getImgShoes(req, res){
 }
 
 
+
+async function  setRelationShoeToUser(req, res){
+    var driver = driverFile.setDriver();
+    var session = driver.session();
+    var params = req.body;
+    var email = params.email;
+    var name = params.name;
+    try {
+        var query = 'MATCH (user:users {email: "'+email+'"}) MATCH (shoe:shoes {name: "'+name+'"}) CREATE (user)-[:LIKE]->(shoe)';
+        var nodes = await session.run(query);
+        
+        res.send({message:"SE MARCÓ COMO FAVORITO"});
+        
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({status:500, message:"internal error"})
+    }
+
+}
+
 module.exports ={
     saveShoes,
     getShoes,
     getShoeByUser,
     getShoeByBrand,
     getShoeByStyle,
-    getImgShoes
+    getImgShoes,
+    setRelationShoeToUser
 }
