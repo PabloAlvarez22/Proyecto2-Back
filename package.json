@@ -4,7 +4,8 @@
   "description": "project about shoes suggestions",
   "main": "index.js",
   "scripts": {
-    "test": "'"
+    "test": "'",
+    "start":"nodemon index.js"
   },
   "author": "Davis Roldan, Pablo Alvarez, Silvia Illescas, Michelle Mejía",
   "license": "MIT",
