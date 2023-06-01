@@ -1,15 +1,18 @@
 'use strict'
 
-var driver = require("./../driver");
+var driverFile = require("./../driver");
 
+var fs = require("fs");
+var path = require("path");
 
 async function  getShoes(req, res){
+    var driver = driverFile.setDriver();
     var session = driver.session();
 
     try {
-        var query = 'MATCH (s:Shoes) RETURN s';
+        var query = 'MATCH (s:shoes) RETURN s';
         var nodes = await session.run(query);
-        res.send({message:"nodes found", nodes:nodes});
+        res.send({message:"nodes found", nodes:nodes.records});
     } catch (error) {
         console.error(error);
         res.status(500).json({status:500, message:"internal error"})
@@ -18,18 +21,22 @@ async function  getShoes(req, res){
 }
 
 
-
 async function  saveShoes(req, res){
+    var driver = driverFile.setDriver();
     var session = driver.session();
     var params = req.body;
-
-    try {
-        var query = 'CREATE (:Shoes { name: "'+params.name+'", brand: "'+params.brand+'", style: "'+params.style+'", style: "'+params.style+'", materialSole: "'+params.materialSole+'", materialShoe: "'+params.materialShoe+'" })';
-        await session.run(query);
-        res.send({message: "node created"});
-    }catch(error){
-        console.error(error);
-        res.status(500).json({status:500, message:"internal error"})
+    if(req.files){
+        var name=uploadImgProd(req.files.imgShoe.path);
+        try {
+            var query = 'CREATE (:shoes { name: "'+params.name+'", brand: "'+params.brand+'", style: "'+params.style+'", materialSole: "'+params.materialSole+'", materialShoe: "'+params.materialShoe+'", imgShoe: "'+name+'", price: "'+params.price+'"  , genre: "'+params.genre+'" })';
+            await session.run(query);
+            res.send({message: "node created"});
+        }catch(error){
+            console.error(error);
+            res.status(500).json({status:500, message:"internal error"})
+        }
+    }else{
+        return res.status(404).send({message: 'Imagen es obligatorio'});
     }
 }
 
