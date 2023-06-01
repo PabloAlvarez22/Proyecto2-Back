@@ -21,25 +21,6 @@ async function  getShoes(req, res){
 }
 
 
-async function  saveShoes(req, res){
-    var driver = driverFile.setDriver();
-    var session = driver.session();
-    var params = req.body;
-    if(req.files){
-        var name=uploadImgProd(req.files.imgShoe.path);
-        try {
-            var query = 'CREATE (:shoes { name: "'+params.name+'", brand: "'+params.brand+'", style: "'+params.style+'", materialSole: "'+params.materialSole+'", materialShoe: "'+params.materialShoe+'", imgShoe: "'+name+'", price: "'+params.price+'"  , genre: "'+params.genre+'" })';
-            await session.run(query);
-            res.send({message: "node created"});
-        }catch(error){
-            console.error(error);
-            res.status(500).json({status:500, message:"internal error"})
-        }
-    }else{
-        return res.status(404).send({message: 'Imagen es obligatorio'});
-    }
-}
-
 
 
 
@@ -238,6 +219,27 @@ async function  getByMaterialSoleShoes(req, res){
             }else{
                 res.send({message:"nodes found", nodes:nodes1.records, string:stringMasFrecuente});
             }      
+        }
+        
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({status:500, message:"internal error"})
+    }
+
+}
+
+async function  getFavorites(req, res){
+    var driver = driverFile.setDriver();
+    var session = driver.session();
+    var params = req.body;
+    var email = params.email;
+    try {
+        var query = 'MATCH (user:users {email: "'+email+'"})-[:LIKE]->(shoe:shoes) RETURN shoe';
+        var nodes = await session.run(query);
+        if(nodes.records.length==0){
+            res.send({message:"nodes not found"});
+        }else{
+            res.send({message:"nodes found", nodes:nodes.records});
         }
         
     } catch (error) {
