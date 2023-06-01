@@ -108,10 +108,79 @@ async function  getShoeByStyle(req, res){
 
 }
 
+
+async function  saveShoes(req, res){
+    var driver = driverFile.setDriver();
+    var session = driver.session();
+    var params = req.body;
+    if(req.files){
+        var name=uploadImgProd(req.files.imgShoe.path);
+        try {
+            var query = 'CREATE (:shoes { name: "'+params.name+'", brand: "'+params.brand+'", style: "'+params.style+'", materialSole: "'+params.materialSole+'", materialShoe: "'+params.materialShoe+'", imgShoe: "'+name+'", price: "'+params.price+'"  , genre: "'+params.genre+'" })';
+            await session.run(query);
+            res.send({message: "node created"});
+        }catch(error){
+            console.error(error);
+            res.status(500).json({status:500, message:"internal error"})
+        }
+    }else{
+        return res.status(404).send({message: 'Imagen es obligatorio'});
+    }
+}
+
+
+
+function uploadImgProd(filePath){    
+    //captura la ruta de la imagen
+    //var filePath = req.files.image.path;
+    
+    //separa en indices cada carpeta
+    //si se trabaja en linux ('\');
+    var fileSplit =  filePath.split('\\');
+
+    //captura el nombre de la imagen
+    var fileName = fileSplit[2];
+
+    var ext = fileName.split('\.');
+    var fileExt = ext[1];
+
+    if( fileExt == 'png' ||
+        fileExt == 'jpg' ||
+        fileExt == 'jpeg' ||
+        fileExt == 'JPG' ||
+        fileExt == 'PNG' ||
+        fileExt == 'gif'){
+           return fileName;
+    }else{
+        fs.unlink(filePath, (err)=>{
+            if(err){
+                return null;
+            }else{
+                return null;
+            }
+        })
+    }
+        
+}
+
+function getImgShoes(req, res){
+    var fileName = req.params.fileName;
+    var pathFile = './uploads/shoes/' + fileName;
+    fs.exists(pathFile, (exists)=>{
+        if(exists){                    
+            return res.sendFile(path.resolve(pathFile))
+        }else{
+           return res.status(404).send({message: 'Imagen inexistente'});
+        }
+    })
+}
+
+
 module.exports ={
     saveShoes,
     getShoes,
     getShoeByUser,
     getShoeByBrand,
-    getShoeByStyle
+    getShoeByStyle,
+    getImgShoes
 }
